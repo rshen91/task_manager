@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+{% block extra_js %}
+<!-- Here is where the link to the JS would go once that is coded -->
+<script type="text/javascript" src="static/"></script>
+{% endblock %}
+{% block content %}
+<!-- This div will be the fixed left bar for the user to click to act on the goals that are in the "main goal page div" below -->
+<body>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="http://www.w3schools.com/lib/w3.css">
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-sm-3 col-lg-2" id="left_bar">
+            <nav class="navbar navbar-default navbar-fixed-side">
+                <button id="add_goal">Add Goal</button><br>
+                <button id="complete_goal">Mark Goal Complete</button><br>
+                <button id="delete_goal">Delete Goal</button><br>
+            </nav>
+        </div>
+<!-- This div is the main div where the user will see their current goals -->
+        <div id="main_goal_div" class="col-sm-9 col-lg-10">
+            <!-- Content  -->
+            <!-- Jinja loop feed from the db the current goals -->
+            {% for goal in active_goals %}
+                show the description
+                <h1>All Goals</h1>
+    
+    <div class="w3-container">
+
+        <div class="w3-progress-container">
+            <div id="myBar" class="w3-progressbar w3-green" style="width:80%">
+            <div id="demo" class="w3-container w3-text-white">80%</div>
+            </div>
+        </div>
+        <br>
+
+        <button class="w3-btn w3-dark-grey">Click Me</button>
+
+    </div>
+                check_by_user_id() 
+
+            {% endfor %}
+        </div>
+    </div>
+</div>
+</body>
+{% endblock %}
+
+<script>
+function move() {
+    var elem = document.getElementById("myBar");
+    var width = 20;
+    var id = setInterval(frame, 10);
+    function frame() {
+        if (width >= 100) {
+          clearInterval(id);
+        } else {
+          width++;
+          elem.style.width = width + '%';
+          document.getElementById("demo").innerHTML = width * 1  + '%';
+        }
+      }
+}
+</script>

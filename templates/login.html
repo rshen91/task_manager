@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+{% block head %}
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Task Manager">
+    <title>Task Manager</title>
+    <!-- Favicon -->
+    <link rel="shortcut icon" href="/static/img/favicon.ico">
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css?family=Lato:700" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/static/css/stylesheet.css">
+{% endblock head %}
+</head>
+
+<body>
+
+{% block login %}
+<div class="container">
+<div class="row" style="margin-top:20px">
+    <div class="col-xs-12 col-sm-8 col-md-6 col-sm-offset-2 col-md-offset-3">
+        <form role="form" action="/login" method="POST">
+
+            <!-- The fieldset tag is used to group related elements in a form. -->
+            <!-- A box is drawn around the related elements. -->
+            <fieldset>
+                
+                <h2>Please Sign In</h2>
+                <hr class="colorgraph">
+
+                <div class="form-group">
+                    <input type="email" name="email" id="email" class="form-control input-lg" placeholder="Email Address">
+                </div>
+
+                <div class="form-group">
+                    <input type="password" name="password" id="password" class="form-control input-lg" placeholder="Password">
+                </div>
+
+                <span class="button-checkbox">
+                    <input type="submit" class="btn btn-lg btn-success btn-block" value="Sign In">
+                    <button type="button" class="btn" data-color="info">Remember Me</button>
+                    <input type="checkbox" name="remember_me" id="remember_me" checked="checked" class="hidden">
+                    </br><a href="" class="btn btn-link pull-right">Forgot Password?</a>
+                </span>
+
+                <hr class="colorgraph">
+            </fieldset>
+        </form>
+        <p>
+            New Users?
+            <button onclick="document.getElementById('#register').style.display='block'" data-toggle="modal" data-target="#register" class="btn btn-primary">Register</button>
+        </p>
+    </div>
+</div>
+</div>
+{% endblock login %}
+
+{% block register %}
+<!-- Registration Modal -->
+<div class="modal fade" id="register" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                <h4 class="modal-title" id="myModalLabel">Register</h4>
+            </div>
+            <div class="modal-body">
+<div class="container">
+<div class="row">
+    <div class="col-xs-12 col-sm-8 col-md-6 col-sm-offset-2 col-md-offset-3">
+        <form role="form" action="/register" method="POST">
+            
+            <!-- The fieldset tag is used to group related elements in a form. -->
+            <!-- A box is drawn around the related elements. -->
+            <fieldset>
+
+                <h2>Please Sign Up <small> • It's free </br>(because it's depricated).</small></h2>
+                <hr class="colorgraph">
+
+                <div class="row">
+                    <div class="col-xs-12 col-sm-6 col-md-6">
+                        <div class="form-group">
+                            <input type="text" name="first_name" id="first_name" class="form-control input-lg" placeholder="First Name" tabindex="1">
+                        </div>
+                    </div>
+
+                    <div class="col-xs-12 col-sm-6 col-md-6">
+                        <div class="form-group">
+                            <input type="text" name="last_name" id="last_name" class="form-control input-lg" placeholder="Last Name" tabindex="2">
+                        </div>
+                    </div>
+                
+                    <div class="col-xs-12 col-sm-6 col-md-6">
+                        <div class="form-group">
+                            <input type="text" name="display_name" id="display_name" class="form-control input-lg" placeholder="Display Name" tabindex="3">
+                        </div>
+                    </div>
+
+                    <div class="col-xs-12 col-sm-6 col-md-6">
+                        <div class="form-group">
+                            <input type="email" name="email" id="email" class="form-control input-lg" placeholder="Email Address" tabindex="4">
+                        </div>
+                    </div>
+
+                    <div class="col-xs-12 col-sm-6 col-md-6">
+                        <div class="form-group">
+                            <input type="phone" name="phone" id="phone" class="form-control input-lg" placeholder="Phone Number" tabindex="5">
+                        </div>
+                    </div>
+
+                    <div class="col-xs-12 col-sm-6 col-md-6">
+                        <div class="form-group">
+                            <input type="password" name="password" id="password" class="form-control input-lg" placeholder="Password" tabindex="5">
+                        </div>
+                    </div>
+
+                    <div class="col-xs-12 col-sm-6 col-md-6">
+                        <div class="form-group">
+                            <input type="password" name="password_confirmation" id="password_confirmation" class="form-control input-lg" placeholder="Confirm Password" tabindex="6">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-xs-4 col-sm-3 col-md-3">
+                        <span class="button-checkbox">
+                            <button type="button" class="btn" data-color="info" tabindex="7">I Agree</button>
+                        </span>
+                    </div>
+                    <div class="col-xs-8 col-sm-9 col-md-9">
+                        <p>
+                        <input type="checkbox" name="t_and_c" id="t_and_c" class="hidden" value="1">
+                         By clicking <strong class="label label-primary">Register</strong>, you agree to the <a href="#" data-toggle="modal" data-target="#register_terms">Terms and Conditions</a> set out by this site, including our Cookie Use.
+                        </p>
+                    </div>
+                </div>
+                
+                <hr class="colorgraph">
+                <div class="row">
+                    <div class="col-xs-12 col-md-6"><input type="submit" value="Register" class="btn btn-primary btn-block btn-lg" tabindex="7"></div>
+                </div>
+            </fieldset>
+        </form>
+    </div>
+</div>
+
+
+            </div>
+            <div class="modal-footer">
+                <hr class="colorgraph">
+                <div class="row">
+                    <div class="col-xs-12 col-md-6">
+                        <input type="submit" value="Register" class="btn btn-primary btn-block btn-lg" tabindex="7"></div>
+                </div>
+                <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-dismiss="modal">I Agree</button>
+            </div>
+            </div>
+            </fieldset>
+        </form>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+</div>
+
+
+
+<!-- T&C Modal -->
+<div class="modal fade" id="register_terms" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                <h4 class="modal-title" id="myModalLabel">Register</h4>
+            </div>
+            <div class="modal-body">
+                <p>
+                <h2>Terms &amp; Conditions</h2></br>
+                <h4>Last updated: October 2016</h4></br>
+                    Please read these Terms and Conditions ("Terms", "Terms and Conditions") carefully before using the Task Manager website (the "Service") operated sporatically by the contributers ("us", "we", or "our"). Your access to and use of the Service is conditioned on your acceptance of and compliance with these Terms. These Terms apply to all visitors, users and others who access or use the Service. By accessing or using the Service you agree to be bound by these Terms. If you disagree with any part of the terms then you may not access the Service.
+                </p>
+                <p>
+                <h3>Content</h3></br>
+                    Our Service allows users to create, edit, share, make content and otherwise make available certain information, text, graphics, videos, or other material ("Content"). You are responsible for the maintenance of your own content.
+                </p>
+                <p>
+                <h3>Links To Other Web Sites</h3></br>
+                    Our Service may contain links to thirdparty web sites or services that are not owned or controlled by us.
+                </p>
+                <p>
+                    We have no control over, and assumes no responsibility for, the content, privacy policies, or practices of any third party web sites or services. You further acknowledge and agree that we shall not be responsible or liable, directly or indirectly, for any damage or loss caused or alleged to be caused by or in connection with use of or reliance on any such content, goods or services available on or through any such web sites or services.
+                </p>
+                <p>
+                <h3>Changes</h3></br>
+                        We reserve the right, at our sole discretion, to modify or replace these Terms at any time. If a revision is material we will not provide any notice to any new terms taking effect. What constitutes a material change will be determined at our sole discretion.
+                </p>
+                <p>
+                <h3>Contact Us</h3></br>
+                        If you have any questions about these Terms, please contact us via the app Github.
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-dismiss="modal">I Agree</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+</div>
+
+{% endblock register %}
+
+</body>
+    <!-- jQuery -->
+    <script type="text/javascript" src="https://ajax.microsoft.com/ajax/jQuery/jquery-1.4.2.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+    <script src="jquery.modal.js" type="text/javascript" charset="utf-8"></script>
+    <!-- Bootstrap Core -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+    <script type="text/javascript">
+    
+    $(function(){
+        $('.button-checkbox').each(function(){
+            var $widget = $(this),
+                $button = $widget.find('button'),
+                $checkbox = $widget.find('input:checkbox'),
+                color = $button.data('color'),
+                settings = {
+                        on: {
+                            icon: 'glyphicon glyphicon-check'
+                        },
+                        off: {
+                            icon: 'glyphicon glyphicon-unchecked'
+                        }
+                };
+            $button.on('click', function () {
+                $checkbox.prop('checked', !$checkbox.is(':checked'));
+                $checkbox.triggerHandler('change');
+                updateDisplay();
+            });
+            $checkbox.on('change', function () {
+                updateDisplay();
+            });
+            function updateDisplay() {
+                var isChecked = $checkbox.is(':checked');
+                // Set the button's state
+                $button.data('state', (isChecked) ? "on" : "off");
+                // Set the button's icon
+                $button.find('.state-icon')
+                    .removeClass()
+                    .addClass('state-icon ' + settings[$button.data('state')].icon);
+                // Update the button's color
+                if (isChecked) {
+                    $button
+                        .removeClass('btn-default')
+                        .addClass('btn-' + color + ' active');
+                }
+                else
+                {
+                    $button
+                        .removeClass('btn-' + color + ' active')
+                        .addClass('btn-default');
+                }
+            }
+            function init() {
+                updateDisplay();
+                // Inject the icon if applicable
+                if ($button.find('.state-icon').length == 0) {
+                    $button.prepend('<i class="state-icon ' + settings[$button.data('state')].icon + '"></i> ');
+                }
+            }
+            init();
+        });
+    });
+    </script>
+</html>

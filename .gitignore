@@ -1,0 +1,16 @@
+/env
+env/
+env-task-manager/
+secrets.sh
+api.py
+*.DS_Store
+*._
+.TemporaryItems
+.Trashes
+.vagrant/
+*.pyc
+node_modules
+*.log
+build
+_test.py
+templates/.DS_Store

@@ -1,0 +1,423 @@
+<!doctype html>
+<html>
+<head>
+    ------------------------------------------------------------------------
+        MY_CLIENT_ID = 
+        MY_CLIENT_SECRET = 
+        MY_REFRESH_TOKEN = 
+    --------------------------------------------------------------------------->
+    <title>My Google Calendars</title>
+    <script type="text/javascript" src="http://code.jquery.com/jquery-1.11.2.min.js"></script>
+    <script type="text/javascript">
+        access_token = null;
+
+        $(document).ready(function () {
+            jQuery.support.cors = true; // For IE, to enable cross-domain requests.
+
+            if (!loadSecrets($('head').html())) {
+                return;
+            }
+
+            getAccessToken();
+            if (access_token == null) {
+                return;
+            }
+
+            getCalendarList(function (calendarList) {
+                displayCalendarList(calendarList);
+                $.each(calendarList.items, function (i, calendar) {
+                    initCalendar(calendar.id, calendar.summary);
+
+                    $('button').click(function () {
+                        $(this).parent().find('button').removeClass('active');
+                        $(this).addClass('active');
+                    });
+                });
+            });
+        });
+
+        function loadSecrets(container) {
+            var reClientId = /<!--[\s\S]*^[ \t]*MY_CLIENT_ID[ \t]*=[ \t]*(\S+)[ \t]*$[\s\S]*/m;
+            var reClientSecret = /<!--[\s\S]*^[ \t]*MY_CLIENT_SECRET[ \t]*=[ \t]*(\S+)[ \t]*$[\s\S]*-->/m;
+            var reRefreshToken = /<!--[\s\S]*^[ \t]*MY_REFRESH_TOKEN[ \t]*=[ \t]*(\S+)[ \t]*$[\s\S]*-->/m;
+
+            var matchClientId = reClientId.exec(container);
+            var matchClientSecret = reClientSecret.exec(container);
+            var matchRefreshToken = reRefreshToken.exec(container);
+
+            var err = null;
+            if (matchClientId == null) {
+                err = (err == null ? '' : err) + '\r\nMissing or invalid entry for MY_CLIENT_ID.';
+            }
+            if (matchClientSecret == null) {
+                err = (err == null ? '' : err) + '\r\nMissing or invalid entry for MY_CLIENT_SECRET.';
+            }
+            if (matchRefreshToken == null) {
+                err = (err == null ? '' : err) + '\r\nMissing or invalid entry for MY_REFRESH_TOKEN.';
+            }
+
+            if (err != null) {
+                err += '\r\n\r\nPlease amend the file as appropriate and retry.'
+                alert(err);
+                return false;
+            }
+
+            clientId = matchClientId[1];
+            clientSecret = matchClientSecret[1];
+            refreshToken = matchRefreshToken[1];
+
+            return true;
+        }
+
+        function getAccessToken() {
+            $.ajax({
+                type: 'POST',
+                async: false,
+                url: 'https://www.googleapis.com/oauth2/v3/token',
+                data: {
+                    client_id: clientId,
+                    client_secret: clientSecret,
+                    refresh_token: refreshToken,
+                    grant_type: 'refresh_token'
+                },
+                dataType: 'json',
+                success: function (resp) {
+                    access_token = resp.access_token;
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    alert('An error occurred while getting new access token.\n(' + errorThrown + ')');
+                }
+            });
+        }
+
+        function getCalendarList(output) {
+            $.ajax({
+                type: 'GET',
+                async: false,
+                url: 'https://www.googleapis.com/calendar/v3/users/me/calendarList?maxResults=250',
+                headers: {
+                    'Authorization': 'Bearer ' + access_token
+                },
+                dataType: 'json',
+                success: function (resp) {
+                    // Filter out Google+ calendars and 'Other calendars' (No event data is returned by the API).
+                    for (var i = resp.items.length - 1; i >= 0; i--) {
+                        if (resp.items[i].id.match(/@group.v.calendar.google.com$/)) {
+                            resp.items.splice(i, 1);
+                        }
+                    }
+                    output(resp);
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    alert('An error occurred while getting calendar list.\n(' + errorThrown + ')');
+                }
+            });
+        }
+
+        function displayCalendarList(calendarList) {
+            $.each(calendarList.items, function (i, item) {
+                var defaultReminders = "";
+                $.each(item.defaultReminders, function (i, reminder) {
+                    if (i > 0) {
+                        defaultReminders += ", "
+                    }
+                    defaultReminders += reminder.method + " " + formattedPeriod(reminder.minutes);
+                });
+                $('#tblCalendars').append('<tr><td>' + item.summary + '</td><td>' + item.id + '</td><td>' + defaultReminders + '</td>');
+            });
+        }
+
+        function getCalendar(id, term, callbackSuccess, callbackError) {
+            var now = new Date();
+            var queryString = 'singleEvents=True&orderBy=startTime&timeMin=' + UtcIso8601(now); // With repetitive entries, default results 250, max results 2500.
+            switch (term) {
+                case 'r7':
+                    queryString += '&maxResults=7';
+                    break;
+                case 'h24':
+                    queryString += '&timeMax=' + UtcIso8601(new Date(now.setHours(now.getHours() + 24)));
+                    break;
+                case 'w1':
+                    queryString += '&timeMax=' + UtcIso8601(new Date(now.setDate(now.getDate() + 7)));
+                    break;
+                case 'm1':
+                    queryString += '&timeMax=' + UtcIso8601(new Date(now.setMonth(now.getMonth() + 1)));
+                    break;
+                case 'y1':
+                    queryString += '&timeMax=' + UtcIso8601(new Date(now.setFullYear(now.getFullYear() + 1)));
+                    break;
+                default:
+                    // All.
+                    break;
+            }
+
+            $.ajax({
+                type: 'GET',
+                async: false,
+                url: 'https://www.googleapis.com/calendar/v3/calendars/' + id + '/events?' + queryString,
+                headers: {
+                    'Authorization': 'Bearer ' + access_token
+                },
+                dataType: 'json',
+                success: function (resp) {
+                    callbackSuccess(resp);
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    callbackError("Error: " + errorThrown);
+                }
+            });
+        }
+
+        function initCalendar(calendarId, calendarSummary) {
+            var $divCalendar = $('#divPatterns div.divCalendar').clone();
+            $divCalendar.find('div span.calendarId').text(calendarId);
+            $divCalendar.find('div span.title').text(calendarSummary);
+            $('body').append($divCalendar).append('<br/>');
+
+            // Color active button.
+            $divCalendar.find('button').first().click();
+            $divCalendar.find('button').first().addClass('active');
+        }
+
+        function refreshCalendar($divCalendar, term) {
+            var calendarId = $divCalendar.find('div span.calendarId').text();
+            var $table = $divCalendar.find('table.tblEvents');
+
+            $table.find('tbody').empty();
+            $table.find('tbody').append("<tr><td colspan=5>Downloading ...</td></tr>");
+
+            getCalendar(calendarId, term,
+                function (calendarData) {
+                    populateCalendarTable(calendarData, $table);
+                },
+                function (errorMsg) {
+                    displayCalendarError(errorMsg, $table)
+                }
+            );
+        }
+
+        function populateCalendarTable(calendar, $table) {
+            $table.find('tbody').empty();
+
+            $.each(sortedByDate(calendar.items), function (i, item) {
+                var reminders = "";
+
+                //reminders += "[use default: " + item.reminders.useDefault + "] ";
+                if (item.reminders.useDefault) {
+                    if (calendar.defaultReminders != null) {
+                        //reminders += "[";
+                        $.each(calendar.defaultReminders, function (i, defaultReminder) {
+                            if (i > 0) {
+                                reminders += ", ";
+                            }
+                            reminders += defaultReminder.method + " " + formattedPeriod(defaultReminder.minutes);
+                        });
+                        //reminders += "]";
+                    }
+                }
+
+                if (item.reminders.overrides != null) {
+                    $.each(item.reminders.overrides, function (i, override) {
+                        if (i > 0) {
+                            reminders += ", ";
+                        }
+                        reminders += override.method + " " + formattedPeriod(override.minutes);
+                    });
+                }
+
+                var visibility = item.visibility == null ? '(default)' : item.visibility;
+
+                var link = '<a href="' + item.htmlLink + '" target="_blank">Details</a>';
+
+                $table.find('tbody').append('<tr><td>' + item.summary + '</td><td>' + (item.start.date != null ? item.start.date : item.start.dateTime) + '</td><td>' + reminders + '</td><td>' + visibility + '</td><td>' + link + '</td></tr>');
+            });
+        }
+
+        function displayCalendarError(errorMsg, $table) {
+            $table.find('tbody').empty();
+            $table.find('tbody').append('<tr><td class="error" colspan="5">' + errorMsg + '</td></tr>');
+        }
+
+        // Utils.
+        function formattedPeriod(minutes) {
+            if (minutes < 60) {
+                return minutes + " mins";
+            }
+
+            var hours = minutes / 60;
+            if (hours < 24) {
+                return hours.toFixed(0) + " hours";
+            }
+
+            var days = minutes / 60 / 24;
+            return days.toFixed(0) + " days ";
+        }
+
+        function sortedByDate(calendarItems) {
+            return calendarItems.sort(function (a, b) {
+                var left = a['start']['date'] != null ? a['start']['date'] : a['start']['dateTime'];
+                var right = b['start']['date'] != null ? b['start']['date'] : b['start']['dateTime'];
+                return (left > right) ? 1 : ((left < right) ? -1 : 0);
+            });
+        }
+
+        function UtcIso8601(date) {
+            var strDate = date.getUTCFullYear() + "-" + (date.getUTCMonth() + 1) + "-" + date.getUTCDate()
+                + "T" + date.getUTCHours() + ":" + date.getUTCMinutes() + ":" + date.getUTCSeconds() + "Z";
+            return strDate;
+        }
+    </script>
+    <style>
+        body {
+            display: block;
+            width: 1000px;
+            margin-left: auto;
+            margin-right: auto;
+            font-family: "Trebuchet MS", Verdana, Helvetica, Sans-Serif;
+            font-size: 14.5px;
+        }
+
+        div {
+            margin: 4px 0;
+        }
+
+        .title {
+            font-size: 30px;
+            color: Brown;
+            padding: 3px 0px;
+        }
+
+        .subtitle {
+            font-size: 20px;
+            color: Brown;
+            padding: 3px 0px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+            table caption {
+                text-align: left;
+            }
+
+            table td {
+                padding: 3px 5px;
+                border-color: silver;
+            }
+
+        #tblCalendars col:nth-child(1) {
+            width: 31%;
+        }
+
+        #tblCalendars col:nth-child(2) {
+            width: 45%;
+        }
+
+        #tblCalendars col:nth-child(3) {
+            width: 24%;
+        }
+
+        .tblEvents col:nth-child(1) {
+            width: 39%;
+        }
+
+        .tblEvents col:nth-child(2) {
+            width: 22%;
+        }
+
+        .tblEvents col:nth-child(3) {
+            width: 24%;
+        }
+
+        .tblEvents col:nth-child(4) {
+            width: 8%;
+        }
+
+        .tblEvents col:nth-child(5) {
+            width: 7%;
+        }
+
+        .tblEvents td:nth-child(1) {
+            color: darkblue;
+        }
+
+            .tblEvents td:nth-child(1).error {
+                color: red;
+            }
+
+        .tblEvents td:nth-child(5) {
+            text-align: center;
+        }
+
+        #divPatterns {
+            display: none;
+        }
+
+        button {
+            width: 80px;
+            background-color: #eee;
+        }
+
+        .active {
+            background-color: lightyellow;
+        }
+    </style>
+</head>
+<body>
+    <table id="tblCalendars" border="1">
+        <caption><span class="title">All calendars</span>&nbsp;<span class="subtitle"></span></caption>
+        <colgroup>
+            <col />
+            <col />
+            <col />
+            <col />
+            <col />
+        </colgroup>
+        <tr>
+            <th>Calendar name</th>
+            <th>ID</th>
+            <th>Default reminders</th>
+        </tr>
+    </table>
+    <br />
+    <div id="divPatterns">
+        <div class="divCalendar">
+            <div>
+                <span class="calendarId" style="display: none;"></span>
+                <span class="title"></span>&nbsp;<span class="subtitle">calendar</span>
+            </div>
+            <div>
+                <span>NOW + </span>
+                <button class="r7" onclick="refreshCalendar($(this).parent().parent(), 'r7');">7 records</button>
+                <button onclick="refreshCalendar($(this).parent().parent(), 'h24');">24 hours</button>
+                <button onclick="refreshCalendar($(this).parent().parent(), 'w1');">1 week</button>
+                <button onclick="refreshCalendar($(this).parent().parent(), 'm1');">1 month</button>
+                <button onclick="refreshCalendar($(this).parent().parent(), 'y1');">1 year</button>
+                <button onclick="refreshCalendar($(this).parent().parent(), null);">All</button>
+                <span>ahead (max 250 records)</span>
+            </div>
+            <table class="tblEvents" border="1">
+                <colgroup>
+                    <col />
+                    <col />
+                    <col />
+                    <col />
+                    <col />
+                </colgroup>
+                <thead>
+                    <tr>
+                        <th>Event title</th>
+                        <th>Start date</th>
+                        <th>Reminders</th>
+                        <th>Visibility</th>
+                        <th>Link</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+</body>
+</html>

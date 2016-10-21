@@ -1,0 +1,123 @@
+<!-- {% block extra_js %} -->
+
+<!-- Here is where the link to the JS would go once that is coded -->
+<!-- <script type="text/javascript" src="static/"></script> -->
+
+<!-- {% endblock %} -->
+{% block content %}
+<link rel="stylesheet" href="/static/css/stylesheet.css">
+{% endblock %}
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+<script src="https://code.jquery.com/jquery-2.1.4.min.js"></script> 
+<!-- This div will be the fixed left bar for the user to click to act on the tasks that are in the "main task div" below -->
+<div class="container-fluid">
+    <div class="row form-group"> 
+        <hr class="colorgraph">
+        <div class="col-xs-12 col-md-9 col-md-push-3" id="left_bar">
+            <nav class="navbar navbar-default navbar-fixed-side">
+                <a href="/goals">View Goals</a><br>
+                <a href="/calendar">View Calendar</a>
+            </nav>
+
+    </div>  
+</div>
+<!-- This is the main div where the user will see all current tasks. -->
+        <div class="col-xs-12 col-md-3 col-md-pull-9" id="main_task_div" >
+            <fieldset>
+            <!-- Content -->
+            <!-- Jinja loop feed from the db the current tasks -->   {% for task in tasks %}
+                    <input type="checkbox" name="task" value="{{ task.task_name }}">{{ task.task_name }} {{ task.due_date }}<br>
+                {% endfor %}
+            </fieldset>
+        <br>
+        <br>
+        <div id="addTaskModal" class="modal col-xs-10 col-sm-9 col-md-6 col-sm-offset-2 col-md-offset-3"> 
+            <div class="model-content modal-lg">
+                <button type="button" class="close" data-dismiss="modal">X</button>
+                <h4 class="modal-title">Add a New Task</h4></div>
+                <div class="modal-body"> 
+                    <form role="form" action="/tasks" method="POST">
+                        <fieldset>
+                            Task Name:
+                             <input type="text" name="taskname"><br>
+                            Due Date:
+                             <input type="date" name="task_due_date"><br>
+                            Priority 
+                            <select name="priority">
+                              <option value="high">High</option>
+                              <option value="medium">Medium</option>
+                              <option value="low">Low</option>
+                            </select><br>
+                            Task Frequency
+                            <select name="task_frequency">
+                                <option value="never">Once</option>
+                                <option value="daily">Daily</option>
+                                <option value="weekly">Weekly</option>
+                                <option value="monthly">Monthly</option>
+                            </select><br>
+                            <input type="submit">
+                        </fieldset>
+                    </form> 
+                </p>
+            </div>
+        </div>
+
+                <!-- insert table -->
+                
+                <script type="text/javascript">
+                //make an ajax call that shows the task is added - this is currently an alert box
+
+                //when the button w the id add task is clicked, an alert box tells the user
+                // $("#add_task").on("click",  function(){
+            //         alert("Task is added")
+            //     }
+            // );
+
+            //want the user to go to a modal window where they can add a task
+            var modal = document.getElementById("addTaskModal");
+
+            //get the button that opens the modal 
+            var btn = document.getElementById("add_task");
+
+            //get the span element that closes the modal 
+            var span = document.getElementsByClassName("close")[0];
+
+            //when the user clicks on the button, open the modal
+            btn.onclick = function() {
+                modal.style.display = "block";
+            }
+
+            //when the user clicks on the span x close the modal
+            span.onclick = function() {
+                modal.style.display = "none";
+            }
+
+            //when the user clicks anywhere outside of the modal, close it
+            window.onclick = function(event) {
+                if (event.target == modal) {
+                    modal.style.display = "none";
+                }
+            }
+                </script>
+                <button id="add_task" onclick="document.getElementById('#add_task').style.display='block'" data-toggle="modal" data-target='#add_task' class="btn btn-primary">Add Task</button><br>
+                <button id="complete_task" type="submit">Mark Task(s) Complete</button><br>
+                <script type="text/javascript">
+
+                //When the button is clicked the user is alerted that their task is marked complete
+                $("#complete_task").on("click", function() {
+                    alert("Marked Task Complete")
+                }
+            );
+                </script>
+                <button id="delete_task" type="submit">Delete Task(s)</button><br>
+                <script type="text/javascript">
+
+                //when the button is clicked the user is alerted that the task is deleted
+                $("#delete_task").on("click", function() {
+                    alert("The task is deleted")
+                }
+            );
+                </script>
+        </div>
+    </div>
+</div>

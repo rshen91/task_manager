@@ -42,8 +42,10 @@ div {
 #left_bar {
     margin-right: auto;
     margin-left: auto;
-    padding-left: 15px;
-    padding-right: 15px;
+    padding-left: 20px;
+    padding-right: 20px;
+    border-style: solid;
+    border-color: red;
 }
 
 .myProgress {
@@ -158,10 +160,33 @@ fieldset {
 
 #main_task_div {
     text-align: center;
-    border-collapse: black;
-    border: 10px;
+    border-style: solid;
+    border-color: black;
 }
 
+#add_task {
+    background: none repeat scroll 0 0 #008080;
+    color: #fff;
+    padding: 12px 0;
+    text-align: center;
+    width: 40%;
+}
+
+#complete_task {
+    background: none repeat scroll 0 0 #008080;
+    color: #fff;
+    padding: 12px 0;
+    text-align: center;
+    width: 40%;
+}
+
+#delete_task {
+    background: none repeat scroll 0 0 #008080;
+    color: #fff;
+    padding: 12px 0;
+    text-align: center;
+    width: 40%;
+}
 
 
 
